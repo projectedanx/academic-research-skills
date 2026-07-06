@@ -2267,6 +2267,12 @@ def main(argv: list[str] | None = None) -> int:
                 aa = passport_data.get("audit_artifact")
                 if isinstance(aa, list):
                     passport_audit_artifacts = aa
+                elif aa is not None:
+                    schema_findings.append(LintError(
+                        "E2",
+                        "passport audit_artifact must be a list if present",
+                        str(args.passport_path),
+                    ))
         except Exception as e:
             print(f"ERROR: cannot load passport {args.passport_path}: {e}", file=sys.stderr)
             return 2
