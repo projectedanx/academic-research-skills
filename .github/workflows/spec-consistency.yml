@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
   # Suffix by event_name so push and pull_request events on the same ref
   # don't fight over the same group. Without the suffix, GHA cancels one
