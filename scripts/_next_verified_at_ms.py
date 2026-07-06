@@ -137,9 +137,11 @@ def _load_passport_audit_artifacts(path: Path) -> list[dict[str, Any]]:
 
     if not isinstance(data, dict):
         return []
-    artifacts = data.get("audit_artifact") or []
-    if not isinstance(artifacts, list):
+    artifacts = data.get("audit_artifact")
+    if artifacts is None:
         return []
+    if not isinstance(artifacts, list):
+        raise ValueError("audit_artifact must be a list if present")
     return artifacts
 
 

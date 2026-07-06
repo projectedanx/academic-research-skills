@@ -953,6 +953,44 @@ class TestD4:
 
 
 class TestE1E2E6:
+    def test_e2_passport_audit_artifact_not_a_list(self) -> None:
+        import tempfile, json, io, sys
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            entry_path = td_path / "entry.json"
+            entry_path.write_text(json.dumps(make_valid_persisted_entry_minor()))
+            sidecar_path = td_path / "sidecar.json"
+            sidecar_path.write_text(json.dumps(make_valid_sidecar()))
+            verdict_path = td_path / "verdict.json"
+            verdict_path.write_text(json.dumps(make_valid_verdict_file_minor()))
+            jsonl_path = td_path / "events.jsonl"
+            jsonl_path.write_text("\n".join(json.dumps(e) for e in make_valid_jsonl_events_no_tool()))
+            passport_path = td_path / "passport.yaml"
+            passport_path.write_text("schema_version: 9\naudit_artifact: not_a_list\n")
+
+            out = io.StringIO()
+            sys.stdout = out
+            try:
+                ret = main([
+                    "--mode", "persisted",
+                    "--entry", str(entry_path),
+                    "--sidecar", str(sidecar_path),
+                    "--verdict", str(verdict_path),
+                    "--jsonl", str(jsonl_path),
+                    "--passport-path", str(passport_path)
+                ])
+            except SystemExit:
+                ret = 1
+            finally:
+                sys.stdout = sys.__stdout__
+
+            output = out.getvalue()
+            assert "[E2]" in output, f"Missing [E2] in output:\n{output}"
+            assert "must be a list if present" in output
+            assert ret == 1
+
+
     """E1/E2/E6 — passport-shape post-hoc detection."""
 
     def test_orchestrator_emitted_passes(self):

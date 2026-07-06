@@ -231,6 +231,14 @@ class TestCli(unittest.TestCase):
         self.assertRegex(out, RFC3339_MS_RE)
         self.assertGreater(parse_rfc3339_ms(out), parse_rfc3339_ms("2099-12-31T23:59:58.000Z"))
 
+    def test_cli_with_non_list_audit_artifact_raises_value_error(self) -> None:
+        with TemporaryDirectory() as td:
+            passport = Path(td) / "passport.yaml"
+            passport.write_text("audit_artifact: {}\n", encoding="utf-8")
+            result = run_script(SCRIPT, "--passport", str(passport))
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("must be a list", result.stderr)
+
     def test_cli_with_no_audit_artifact_key_returns_now(self) -> None:
         with TemporaryDirectory() as td:
             passport = Path(td) / "passport.yaml"
