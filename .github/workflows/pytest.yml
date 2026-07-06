@@ -33,6 +33,9 @@ concurrency:
   group: pytest-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   pytest:
     runs-on: ubuntu-latest
