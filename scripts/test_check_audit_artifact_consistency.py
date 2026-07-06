@@ -978,7 +978,7 @@ class TestE1E2E6:
                     "--sidecar", str(sidecar_path),
                     "--verdict", str(verdict_path),
                     "--jsonl", str(jsonl_path),
-                    "--passport", str(passport_path)
+                    "--passport-path", str(passport_path)
                 ])
             except SystemExit:
                 ret = 1
