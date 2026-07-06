@@ -15,6 +15,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: read
+
 concurrency:
   group: release-cooldown-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: false
