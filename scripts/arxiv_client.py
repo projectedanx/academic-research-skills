@@ -13,7 +13,7 @@ arXiv-specific differences from the Crossref/OpenAlex siblings:
     `{http://www.w3.org/2005/Atom}`.
   - The exact-key endpoint is keyed by arXiv ID, not DOI:
     `?id_list={id}` for ID lookup, `?search_query=ti:"{title}"` for the
-    title fallback. The base is `http://export.arxiv.org/api/query`.
+    title fallback. The base is `https://export.arxiv.org/api/query`.
   - There is no polite-pool email convention. Rate-limit pacing is a
     fixed min-interval; arXiv asks callers to wait ~3s between requests
     (https://info.arxiv.org/help/api/tou.html), so `_ARXIV_MIN_INTERVAL`
@@ -52,7 +52,7 @@ except ImportError:
     )
 
 
-_API_BASE = "http://export.arxiv.org/api/query"
+_API_BASE = "https://export.arxiv.org/api/query"
 _ATOM_NS = "{http://www.w3.org/2005/Atom}"
 
 # arXiv API Terms of Use ask callers to pace requests ~3s apart.

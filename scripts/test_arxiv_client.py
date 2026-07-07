@@ -218,7 +218,7 @@ def test_429_triggers_2s_backoff_3_retries(monkeypatch):
     def mock_urlopen(*args, **kwargs):
         call_count[0] += 1
         raise urllib.error.HTTPError(
-            url="http://export.arxiv.org/api/query",
+            url="https://export.arxiv.org/api/query",
             code=429, msg="Too Many Requests", hdrs={}, fp=None,
         )
 
@@ -243,7 +243,7 @@ def test_5xx_skips_immediately():
     def mock_urlopen(*args, **kwargs):
         call_count[0] += 1
         raise urllib.error.HTTPError(
-            url="http://export.arxiv.org/api/query", code=503, msg="SU",
+            url="https://export.arxiv.org/api/query", code=503, msg="SU",
             hdrs={}, fp=None,
         )
 
