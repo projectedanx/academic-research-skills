@@ -14,9 +14,9 @@ If either migration tool's tests regress after this extraction, the
 shared module has drifted from the per-tool configuration that was
 verified across multiple v3.7.3 / v3.9.0 review rounds.
 """
+
 from __future__ import annotations
 
-import io
 import os
 import sys
 import tempfile
@@ -87,6 +87,41 @@ class RoundTripTest(unittest.TestCase):
         out = self._round_trip(content)
         self.assertIn("'single'", out)
         self.assertIn('"double"', out)
+
+
+class LoadPassportTest(unittest.TestCase):
+    """Focused unit tests for load_passport."""
+
+    def test_load_valid_yaml(self) -> None:
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "valid.yaml"
+
+            path.write_text("key: value\n", encoding="utf-8")
+
+            doc = py.load_passport(path)
+
+            self.assertEqual(doc["key"], "value")
+
+    def test_load_missing_file(self) -> None:
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "missing.yaml"
+
+            with self.assertRaises(FileNotFoundError):
+                py.load_passport(path)
+
+    def test_load_invalid_yaml(self) -> None:
+
+        from ruamel.yaml.error import YAMLError
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "invalid.yaml"
+
+            path.write_text("key: : value\n", encoding="utf-8")
+
+            with self.assertRaises(YAMLError):
+                py.load_passport(path)
 
 
 class APIShapeTest(unittest.TestCase):
