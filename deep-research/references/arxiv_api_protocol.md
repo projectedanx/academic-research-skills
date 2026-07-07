@@ -2,7 +2,7 @@
 
 **Status**: v3.11 (#182 Delta 1)
 **Used by**: `bibliography_agent`, `scripts/contamination_signals.py` (`resolve_arxiv_unmatched`)
-**API base**: `http://export.arxiv.org/api/query`
+**API base**: `https://export.arxiv.org/api/query`
 **Rate limit**: arXiv asks callers to pace requests ~3s apart (https://info.arxiv.org/help/api/tou.html). No polite-pool / higher-tier mechanism.
 **Polite email env var**: none (arXiv has no such convention)
 
