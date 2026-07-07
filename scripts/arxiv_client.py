@@ -31,6 +31,9 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from typing import Any
 
+from defusedxml.ElementTree import fromstring as _xml_fromstring
+from defusedxml.common import DefusedXmlException as _DefusedXmlException
+
 # Dual-path import: see openalex_client.py comment.
 try:
     from _text_similarity import (
@@ -130,11 +133,12 @@ class ArxivClient:
                     # read/parse except (ET.ParseError replaces JSONDecodeError).
                     try:
                         body = resp.read()
-                        root = ET.fromstring(body)
+                        root = _xml_fromstring(body)
                     except (
                         OSError,
                         http.client.HTTPException,
                         ET.ParseError,
+                        _DefusedXmlException,
                     ) as e:
                         # http.client.HTTPException covers IncompleteRead
                         # (truncated body) which inherits HTTPException, not
