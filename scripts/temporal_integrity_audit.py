@@ -39,6 +39,8 @@ DATE_REGEX = (
     r"|(?:19|20)\d{2}"
 )
 
+DATE_PATTERN = re.compile(DATE_REGEX, re.IGNORECASE)
+
 PATTERN_A = re.compile(
     r"(?:as of|on|in|reported in|stated in|noted in)\s+"
     r"(?P<anchor>" + DATE_REGEX + r")"
@@ -385,12 +387,11 @@ def _pass_2_anachronism(draft: str, timeline: dict, citation_provenance: dict, f
         window_start = max(0, m_ref.start() - 200)
         window_end = min(len(draft), m_ref.end() + 200)
         window = draft[window_start:window_end]
-        date_pattern = re.compile(DATE_REGEX, re.IGNORECASE)
         # Compute ref marker span relative to window
         ref_in_window_start = m_ref.start() - window_start
         ref_in_window_end = m_ref.end() - window_start
         event_dates = [
-            d for d in date_pattern.finditer(window)
+            d for d in DATE_PATTERN.finditer(window)
             if d.end() <= ref_in_window_start or d.start() >= ref_in_window_end
         ]
         if not event_dates:
@@ -570,7 +571,6 @@ def _pass_4_causal(draft: str, timeline: dict, citation_provenance: dict, findin
     required ordering. If violated, emits TEMPORAL-CAUSAL-INVERSION.
     """
     sources_by_key = {s["citation_key"]: s for s in timeline.get("sources", [])}
-    date_pattern = re.compile(DATE_REGEX, re.IGNORECASE)
 
     pos = 0
     for sentence in re.split(r"(?<=[.!?])\s+", draft):
@@ -594,7 +594,7 @@ def _pass_4_causal(draft: str, timeline: dict, citation_provenance: dict, findin
             left_date_raw = None
             if left_slug is None:
                 # v3.9.4.1 fix #3: direct date fallback (spec §3.2 P4)
-                left_dates = list(date_pattern.finditer(pre))
+                left_dates = list(DATE_PATTERN.finditer(pre))
                 if left_dates:
                     left_date_raw = left_dates[-1].group(0)
 
@@ -603,7 +603,7 @@ def _pass_4_causal(draft: str, timeline: dict, citation_provenance: dict, findin
             right_slug = right_refs[0].group(1) if right_refs else None
             right_date_raw = None
             if right_slug is None:
-                right_dates = list(date_pattern.finditer(post))
+                right_dates = list(DATE_PATTERN.finditer(post))
                 if right_dates:
                     right_date_raw = right_dates[0].group(0)
 
