@@ -124,6 +124,39 @@ class LoadPassportTest(unittest.TestCase):
                 py.load_passport(path)
 
 
+
+class DumpPassportTest(unittest.TestCase):
+    """Focused unit tests for dump_passport."""
+
+    def test_dump_valid_yaml(self) -> None:
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "out.yaml"
+
+            py.dump_passport(path, {"key": "value"})
+
+            content = path.read_text(encoding="utf-8")
+            self.assertEqual(content, "key: value\n")
+
+    def test_dump_missing_directory(self) -> None:
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "missing" / "out.yaml"
+
+            with self.assertRaises(FileNotFoundError):
+                py.dump_passport(path, {"key": "value"})
+
+    def test_dump_unwritable_file(self) -> None:
+
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "readonly.yaml"
+            path.touch()
+            os.chmod(path, 0o400)
+
+            with self.assertRaises(PermissionError):
+                py.dump_passport(path, {"key": "value"})
+
+
 class APIShapeTest(unittest.TestCase):
     """The shared module exposes load_passport + dump_passport as the
     public API. Both migration tools import from this module."""
