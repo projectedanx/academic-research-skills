@@ -15,6 +15,7 @@ Exit codes:
   1 — drift detected under --check
   2 — invocation error (schema or target missing)
 """
+
 from __future__ import annotations
 import argparse
 import json
@@ -23,7 +24,9 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = REPO_ROOT / "shared/contracts/passport/literature_corpus_entry.schema.json"
+SCHEMA_PATH = (
+    REPO_ROOT / "shared/contracts/passport/literature_corpus_entry.schema.json"
+)
 DEFAULT_TARGET = REPO_ROOT / "academic-pipeline/references/adapters/overview.md"
 
 MARKERS = {
@@ -70,22 +73,39 @@ def build_table(schema: dict, which: str) -> str:
     return header + "\n" + "\n".join(rows) + "\n"
 
 
+_COMPILED_MARKERS = {
+    marker_name: (
+        f"<!-- GENERATED:{marker_name}:START -->",
+        f"<!-- GENERATED:{marker_name}:END -->",
+        re.compile(
+            re.escape(f"<!-- GENERATED:{marker_name}:START -->")
+            + r".*?"
+            + re.escape(f"<!-- GENERATED:{marker_name}:END -->"),
+            re.DOTALL,
+        ),
+    )
+    for marker_name in MARKERS
+}
+
+
 def regenerate_file(content: str, schema: dict) -> str:
     for marker_name, which in MARKERS.items():
-        start = f"<!-- GENERATED:{marker_name}:START -->"
-        end = f"<!-- GENERATED:{marker_name}:END -->"
+        start, end, pattern = _COMPILED_MARKERS[marker_name]
         if start not in content or end not in content:
             continue
         table = build_table(schema, which)
-        pattern = re.compile(re.escape(start) + r".*?" + re.escape(end), re.DOTALL)
         content = pattern.sub(f"{start}\n{table}{end}", content)
     return content
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--check", action="store_true", help="Exit 1 on drift, do not modify files.")
-    ap.add_argument("--target", type=Path, default=DEFAULT_TARGET, help="Overview file to update.")
+    ap.add_argument(
+        "--check", action="store_true", help="Exit 1 on drift, do not modify files."
+    )
+    ap.add_argument(
+        "--target", type=Path, default=DEFAULT_TARGET, help="Overview file to update."
+    )
     args = ap.parse_args()
 
     if not SCHEMA_PATH.exists():
@@ -107,7 +127,9 @@ def main() -> int:
             f"DRIFT: {args.target} is out-of-date relative to the schema.",
             file=sys.stderr,
         )
-        print("Run `python scripts/sync_adapter_docs.py` to regenerate.", file=sys.stderr)
+        print(
+            "Run `python scripts/sync_adapter_docs.py` to regenerate.", file=sys.stderr
+        )
         return 1
 
     args.target.write_text(new, encoding="utf-8")
